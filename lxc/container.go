@@ -14,6 +14,7 @@ import (
 
 const (
 	LXC_BASE_PATH = "/var/lib/lxc"
+	LXC_BIN       = "/usr/bin"
 )
 
 type Container struct {
@@ -36,17 +37,17 @@ func (c *Container) GetState() (string, error) {
 }
 
 func (c *Container) Start() error {
-	_, err := common.RunCommand("lxc-start", []string{"-n", c.Name})
+	_, err := common.RunCommand(path.Join(LXC_BIN, "lxc-start"), []string{"-n", c.Name})
 	return err
 }
 
 func (c *Container) Stop() error {
-	_, err := common.RunCommand("lxc-stop", []string{"-n", c.Name})
+	_, err := common.RunCommand(path.Join(LXC_BIN, "lxc-stop"), []string{"-n", c.Name})
 	return err
 }
 
 func (c *Container) Info() (map[string]string, error) {
-	out, err := common.RunCommand("lxc-info", []string{"-n", c.Name})
+	out, err := common.RunCommand(path.Join(LXC_BIN, "lxc-info"), []string{"-n", c.Name})
 	if err != nil {
 		return nil, err
 	}
@@ -102,7 +103,7 @@ func (c *Container) Exists() bool {
 }
 
 func (c *Container) CGroup(name string) (string, error) {
-	out, err := common.RunCommand("lxc-cgroup", []string{"-n", c.Name, name})
+	out, err := common.RunCommand(path.Join(LXC_BIN, "lxc-cgroup"), []string{"-n", c.Name, name})
 	return out, err
 }
 
@@ -129,7 +130,7 @@ func (c *Container) RamUsage() (int, error) {
 }
 
 func (c *Container) Create(template string, fssize int, config string) (string, error) {
-	out, err := common.RunCommand("lxc-create", []string{"-n", c.Name,
+	out, err := common.RunCommand(path.Join(LXC_BIN, "lxc-create"), []string{"-n", c.Name,
 		"-t", template, "-B", "lvm", fmt.Sprintf("--fssize=%vGB", fssize)})
 	if err := c.AppendConfig(config); err != nil {
 		return out, err
@@ -185,7 +186,7 @@ func NewContainer(name string) *Container {
 }
 
 func ListContainers() ([]Container, error) {
-	out, err := common.RunCommand("lxc-ls", []string{"--fancy", "-F", "name,state"})
+	out, err := common.RunCommand(path.Join(LXC_BIN, "lxc-ls"), []string{"--fancy", "-F", "name,state"})
 	lines := strings.Split(out, "\n")
 	res := make([]Container, 0)
 	for _, value := range lines[1:] {
