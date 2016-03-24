@@ -55,7 +55,7 @@ func ValidatePostListContainer(c CreateContainerParams) map[string]interface{} {
 
 func GoCreateContainer(lxc_c lxc.Container, create_params CreateContainerParams, env *rpc.Env) {
 	log.Printf("Creating container: %v, params: %v", lxc_c, create_params)
-	meta := map[string]interface{}{
+	meta := map[string]interface{}{}
 	out, err := lxc_c.Create(create_params.Dist, create_params.Fssize, create_params.Config)
 	if err == nil {
 		log.Printf("Created container: %v, params: %v, result: %v, err: %v", lxc_c, create_params, out, err)
