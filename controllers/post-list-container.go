@@ -62,7 +62,7 @@ func GoCreateContainer(lxc_c lxc.Container, create_params CreateContainerParams,
 		conf, _ := lxc_c.ReadConfig()
 		ip_address := lxc_c.GetInternalIp()
 		meta["config"] = conf
-		meta["internal_ipv4" = ip_address
+		meta["internal_ipv4"] = ip_address
 	} else {
 		log.Printf("Error creating container, %s", err.Error())
 	}
