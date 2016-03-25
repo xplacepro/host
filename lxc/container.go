@@ -85,14 +85,16 @@ func (c *Container) GetInternalIp(timeout int) (string, error) {
 		if err := c.Stop(); err != nil {
 			return res, err
 		}
-		return res
+		return res, nil
 	case <-time.After(time.Second * time.Duration(timeout)):
 		if err := c.Stop(); err != nil {
+			return "", err
 		}
-		return "", err
+		log.Printf("Timeout while getting ip address for container %s", c.Name)
+		return "", nil
 	}
 
-	return "", nils
+	return "", nil
 
 }
 
