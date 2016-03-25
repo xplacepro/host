@@ -6,6 +6,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/xplacepro/host/controllers"
 	"github.com/xplacepro/rpc"
+	"log"
 	"net/http"
 	"os"
 )
@@ -42,5 +43,6 @@ func main() {
 	r.Handle("/api/v1/containers/{hostname:[a-zA-Z0-9-]+}/start", rpc.Handler{env, controllers.PostStartContainerHandler}).Methods("POST")
 	r.Handle("/api/v1/containers/{hostname:[a-zA-Z0-9-]+}/stop", rpc.Handler{env, controllers.PostStopContainerHandler}).Methods("POST")
 	http.Handle("/", r)
+	log.Printf("Started server on %s", *Listen)
 	http.ListenAndServe(*Listen, nil)
 }
