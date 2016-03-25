@@ -55,8 +55,9 @@ func (c *Container) Info() (map[string]string, error) {
 	return values, nil
 }
 
-func (c *Container) GetInternalIp() string {
+func (c *Container) GetInternalIp(timeout int) (string, error) {
 	if err := c.Start(); err != nil {
+		return "", err
 	}
 
 	ip_chan := make(chan string)
@@ -64,7 +65,7 @@ func (c *Container) GetInternalIp() string {
 	log.Printf("Getting ip address for container %s", c.Name)
 
 	go func() {
-		for {
+		for retry := timeout; retry > 0; retry -= 1 {
 			time.Sleep(time.Second * 1)
 			info, err := c.Info()
 			if err != nil {
@@ -82,15 +83,16 @@ func (c *Container) GetInternalIp() string {
 	select {
 	case res := <-ip_chan:
 		if err := c.Stop(); err != nil {
+			return res, err
 		}
 		return res
-	case <-time.After(time.Second * 30):
+	case <-time.After(time.Second * time.Duration(timeout)):
 		if err := c.Stop(); err != nil {
 		}
-		return ""
+		return "", err
 	}
 
-	return ""
+	return "", nils
 
 }
 
