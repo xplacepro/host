@@ -9,6 +9,7 @@ import (
 	"log"
 	"net/http"
 	"strings"
+	"time"
 )
 
 type CreateContainerParams struct {
@@ -59,6 +60,7 @@ func GoCreateContainer(lxc_c lxc.Container, create_params CreateContainerParams,
 	out, err := lxc_c.Create(create_params.Dist, create_params.Fssize, create_params.Config)
 	if err == nil {
 		log.Printf("Created container: %v, params: %v, result: %v, err: %v", lxc_c, create_params, out, err)
+		time.Sleep(2)
 		conf, _ := lxc_c.ReadConfig()
 		meta["config"] = conf
 		ip_address, ip_err := lxc_c.GetInternalIp(30)
