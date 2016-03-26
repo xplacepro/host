@@ -1,11 +1,14 @@
 package lxc
 
 import (
+	"bytes"
 	"fmt"
 	"github.com/xplacepro/common"
+	"io"
 	"io/ioutil"
 	"log"
 	"os"
+	"os/exec"
 	"path"
 	"strconv"
 	"strings"
@@ -143,8 +146,43 @@ func (c *Container) Create(template string, fssize int, config string) (string, 
 }
 
 func (c *Container) Destroy() (string, error) {
-	out, err := common.RunCommand("lxc-destroy", []string{"-n", c.Name})
+	out, err := common.RunCommand(path.Join(LXC_BIN, "lxc-destroy"), []string{"-n", c.Name})
 	return out, err
+}
+
+func (c *Container) ResetPassword(user, password string) error {
+	log.Printf("Resetting password for container %s", c.Name)
+
+	proc := exec.Command(path.Join(LXC_BIN, "lxc-attach"), "-n", c.Name, "--", "passwd", user)
+
+	stdin, err := proc.StdinPipe()
+	if err != nil {
+		log.Printf("Error while resetting password for container %s, %s", c.Name, err.Error())
+		return err
+	}
+	defer stdin.Close()
+
+	stdout := &bytes.Buffer{}
+	stderr := &bytes.Buffer{}
+
+	proc.Stdout = stdout
+	proc.Stderr = stderr
+
+	if err := proc.Start(); err != nil {
+		log.Printf("Error while resetting password for container %s, %s, %s", c.Name, string(stderr.Bytes()), string(stdout.Bytes()))
+		return err
+	}
+
+	io.WriteString(stdin, fmt.Sprintf("%s\n%s\n", password, password))
+	if err := proc.Wait(); err != nil {
+
+		log.Printf("Error while resetting password for container %s, %s, %s", c.Name, string(stderr.Bytes()), string(stdout.Bytes()))
+		return err
+	}
+	log.Printf("Resetted password for container %s", c.Name)
+
+	return nil
+
 }
 
 func (c Container) String() string {

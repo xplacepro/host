@@ -12,7 +12,7 @@ import (
 	"time"
 )
 
-type CreateContainerParams struct {
+type createContainerParams struct {
 	Hostname string
 	Dist     string
 	Fssize   int
@@ -23,7 +23,7 @@ type CreateContainerParams struct {
 	Code     string
 }
 
-func ValidatePostListContainer(c CreateContainerParams) map[string]interface{} {
+func ValidatePostListContainer(c createContainerParams) map[string]interface{} {
 	validationErrors := make(map[string]interface{})
 
 	if strings.Trim(c.Dist, " ") == "" {
@@ -54,7 +54,7 @@ func ValidatePostListContainer(c CreateContainerParams) map[string]interface{} {
 	return validationErrors
 }
 
-func GoCreateContainer(lxc_c lxc.Container, create_params CreateContainerParams, env *rpc.Env) {
+func GoCreateContainer(lxc_c lxc.Container, create_params createContainerParams, env *rpc.Env) {
 	log.Printf("Creating container: %v, params: %v", lxc_c, create_params)
 	meta := map[string]interface{}{}
 	out, err := lxc_c.Create(create_params.Dist, create_params.Fssize, create_params.Config)
@@ -76,7 +76,7 @@ func GoCreateContainer(lxc_c lxc.Container, create_params CreateContainerParams,
 }
 
 func PostListContainerHandler(env *rpc.Env, w http.ResponseWriter, r *http.Request) (rpc.Response, int, error) {
-	var create_params CreateContainerParams
+	var create_params createContainerParams
 
 	data, err := ioutil.ReadAll(r.Body)
 	if err != nil {

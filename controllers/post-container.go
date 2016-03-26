@@ -11,7 +11,7 @@ import (
 	"net/http"
 )
 
-type UpdateContainer struct {
+type updateContainer struct {
 	Config string
 }
 
@@ -19,7 +19,7 @@ func PostContainerHandler(env *rpc.Env, w http.ResponseWriter, r *http.Request) 
 	vars := mux.Vars(r)
 	hostname := vars["hostname"]
 
-	var c UpdateContainer
+	var c updateContainer
 
 	data, err := ioutil.ReadAll(r.Body)
 	if err != nil {
@@ -37,9 +37,8 @@ func PostContainerHandler(env *rpc.Env, w http.ResponseWriter, r *http.Request) 
 		return nil, http.StatusBadRequest, rpc.StatusError{Err: errors.New(fmt.Sprintf("%s doesn't exist", hostname))}
 	}
 
-	config_err := container.ReplaceConfig(c.Config)
-	if config_err != nil {
-		return nil, http.StatusBadRequest, rpc.StatusError{Err: config_err}
+	if err := container.ReplaceConfig(c.Config); err != nil {
+		return nil, http.StatusBadRequest, rpc.StatusError{Err: err}
 	}
 
 	return rpc.SyncResponse{"Success", http.StatusOK, map[string]interface{}{}}, http.StatusOK, nil

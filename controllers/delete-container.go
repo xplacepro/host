@@ -13,12 +13,12 @@ import (
 	"strings"
 )
 
-type DeleteContainerParams struct {
+type deleteContainerParams struct {
 	Callback string
 	Code     string
 }
 
-func ValidateDeleteContainer(c DeleteContainerParams) map[string]interface{} {
+func ValidateDeleteContainer(c deleteContainerParams) map[string]interface{} {
 	validationErrors := make(map[string]interface{})
 
 	if strings.Trim(c.Code, " ") == "" {
@@ -31,7 +31,7 @@ func ValidateDeleteContainer(c DeleteContainerParams) map[string]interface{} {
 	return validationErrors
 }
 
-func GoDeleteContainer(lxc_c lxc.Container, delete_params DeleteContainerParams, env *rpc.Env) {
+func GoDeleteContainer(lxc_c lxc.Container, delete_params deleteContainerParams, env *rpc.Env) {
 	log.Printf("Deleting container: %v", lxc_c)
 	out, err := lxc_c.Destroy()
 	log.Printf("Deleted container: %v, result: %v, err: %v", lxc_c, out, err)
@@ -46,7 +46,7 @@ func DeleteContainerHandler(env *rpc.Env, w http.ResponseWriter, r *http.Request
 
 	container := lxc.NewContainer(hostname)
 
-	var delete_params DeleteContainerParams
+	var delete_params deleteContainerParams
 
 	data, err := ioutil.ReadAll(r.Body)
 	if err != nil {
