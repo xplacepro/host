@@ -58,6 +58,18 @@ func (c *Container) Info() (map[string]string, error) {
 	return values, nil
 }
 
+func (c *Container) Resources() map[string]interface{} {
+	resources := make(map[string]interface{})
+	if cpu, err := c.CpuUsage(); err == nil {
+		resources["Cpu"] = cpu
+	}
+	if ram, err := c.RamUsage(); err == nil {
+		resources["Ram"] = ram
+	}
+	resources["Timestamp"] = time.Now().Unix()
+	return resources
+}
+
 func (c *Container) GetInternalIp(timeout int) (string, error) {
 	if err := c.Start(); err != nil {
 		return "", err
@@ -119,7 +131,7 @@ func (c *Container) CpuUsage() ([]int, error) {
 	if err != nil {
 		return nil, err
 	}
-	per_cpu_str := strings.Split(out, " ")
+	per_cpu_str := strings.Fields(out)
 	per_cpu := make([]int, len(per_cpu_str))
 	for idx, value := range per_cpu_str {
 		int_value, _ := strconv.Atoi(value)
@@ -227,14 +239,17 @@ func NewContainer(name string) *Container {
 	return &Container{Name: name}
 }
 
-func ListContainers() ([]Container, error) {
+func ListContainers() ([]map[string]interface{}, error) {
 	out, err := common.RunCommand(path.Join(LXC_BIN, "lxc-ls"), []string{"--fancy", "-F", "name,state"})
 	lines := strings.Split(out, "\n")
-	res := make([]Container, 0)
+	res := make([]map[string]interface{}, 0)
 	for _, value := range lines[1:] {
+		item := make(map[string]interface{})
 		values := strings.Fields(value)
 		if len(values) > 0 {
-			res = append(res, Container{Name: values[0], State: values[1]})
+			item["Name"] = values[0]
+			item["State"] = values[1]
+			res = append(res, item)
 		}
 	}
 	return res, err

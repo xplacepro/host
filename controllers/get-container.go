@@ -20,6 +20,7 @@ func GetContainerHandler(env *rpc.Env, w http.ResponseWriter, r *http.Request) (
 	}
 
 	info, err := container.Info()
+	state := info["State"]
 
 	if err != nil {
 		return nil, http.StatusInternalServerError, rpc.StatusError{Err: err}
@@ -29,6 +30,10 @@ func GetContainerHandler(env *rpc.Env, w http.ResponseWriter, r *http.Request) (
 
 	for k, v := range info {
 		info_generic[k] = v
+	}
+
+	if state == "RUNNING" {
+		info_generic["Resources"] = container.Resources()
 	}
 
 	return rpc.SyncResponse{"Success", http.StatusOK, info_generic}, http.StatusOK, nil
