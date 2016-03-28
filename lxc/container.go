@@ -46,7 +46,10 @@ func (c *Container) Start() error {
 
 func (c *Container) Stop() error {
 	_, err := common.RunCommand(path.Join(LXC_BIN, "lxc-stop"), []string{"-n", c.Name})
-	return err
+	if err != nil && !strings.Contains(err.Error(), "is not running") {
+		return err
+	}
+	return nil
 }
 
 func (c *Container) Info() (map[string]string, error) {
