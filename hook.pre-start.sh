@@ -3,4 +3,4 @@
 # echo "environment:" >> /tmp/test
 # env | grep LXC >> /tmp/test
 
-exec $GOPATH/bin/host --config= --notify=RUNNING --hostname=$1
+sh $GOPATH/bin/host --config= --notify=RUNNING --hostname=$1
