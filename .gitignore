@@ -25,3 +25,4 @@ _testmain.go
 
 config_local.ini
 start.sh
+stop.sh
