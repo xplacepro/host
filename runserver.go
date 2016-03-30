@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"github.com/gorilla/mux"
 	"github.com/xplacepro/host/controllers"
 	"github.com/xplacepro/rpc"
@@ -17,8 +18,16 @@ func ReloadEnv(env *rpc.Env, config map[string]string) {
 	env.ClientAuth = rpc.ClientBasicAuthorization{config["client_auth.user"], config["client_auth.password"]}
 }
 
+func DoNotifyState(notifier, hostname, state string, env *rpc.Env) error {
+	url := fmt.Sprintf(notifier, hostname, state)
+	_, err := rpc.DoCallbackRequest(url, rpc.CallbackRequest{}, env.ClientAuth)
+	return err
+}
+
 func main() {
 	var ConfigPath = flag.String("config", "config.ini", "Path to configuration file")
+	var NotifyState = flag.String("notify", "", "Notify container state")
+	var Hostname = flag.String("hostname", "", "Notify container hostname")
 	flag.Parse()
 
 	var config map[string]string
@@ -39,6 +48,11 @@ func main() {
 	rpc.ParseConfiguration(*ConfigPath, &config)
 
 	ReloadEnv(env, config)
+
+	if *NotifyState != "" && *Hostname != "" {
+		DoNotifyState(config["state.notifier"], *Hostname, *NotifyState, env)
+		return
+	}
 
 	r := mux.NewRouter()
 	r.StrictSlash(false)
