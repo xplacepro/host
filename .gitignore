@@ -24,5 +24,3 @@ _testmain.go
 *.prof
 
 config_local.ini
-start.sh
-stop.sh
