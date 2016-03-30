@@ -31,13 +31,13 @@ func ValidateDeleteContainer(c deleteContainerParams) map[string]interface{} {
 	return validationErrors
 }
 
-func GoDeleteContainer(lxc_c lxc.Container, delete_params deleteContainerParams, env *rpc.Env) {
+func GoDeleteContainer(lxc_c lxc.Container, delete_params deleteContainerParams, ClientAuth rpc.ClientAuthorization) {
 	log.Printf("Deleting container: %v", lxc_c)
 	out, err := lxc_c.Destroy()
 	log.Printf("Deleted container: %v, result: %v, err: %v", lxc_c, out, err)
 	callback_req := rpc.CallbackRequest{Err: err, Identifier: lxc_c.Name, Op_type: "DELETE_CONTAINER", Metadata: map[string]interface{}{}, Code: delete_params.Code, Output: out}
 	log.Printf("Making callback request to %s: %v", delete_params.Callback, callback_req)
-	rpc.DoCallbackRequest(delete_params.Callback, callback_req, env.ClientUser, env.ClientPassword)
+	rpc.DoCallbackRequest(delete_params.Callback, callback_req, ClientAuth)
 }
 
 func DeleteContainerHandler(env *rpc.Env, w http.ResponseWriter, r *http.Request) (rpc.Response, int, error) {
@@ -71,7 +71,7 @@ func DeleteContainerHandler(env *rpc.Env, w http.ResponseWriter, r *http.Request
 		return nil, http.StatusBadRequest, rpc.StatusError{Err: errors.New(fmt.Sprintf("%s is not in STOPPED state", hostname))}
 	}
 
-	go GoDeleteContainer(*container, delete_params, env)
+	go GoDeleteContainer(*container, delete_params, env.ClientAuth)
 
 	return rpc.SyncResponse{"Success", http.StatusOK, map[string]interface{}{}}, http.StatusOK, nil
 }

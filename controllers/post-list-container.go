@@ -54,7 +54,7 @@ func ValidatePostListContainer(c createContainerParams) map[string]interface{} {
 	return validationErrors
 }
 
-func GoCreateContainer(lxc_c lxc.Container, create_params createContainerParams, env *rpc.Env) {
+func GoCreateContainer(lxc_c lxc.Container, create_params createContainerParams, ClientAuth rpc.ClientAuthorization) {
 	log.Printf("Creating container: %v, params: %v", lxc_c, create_params)
 	meta := map[string]interface{}{}
 	out, err := lxc_c.Create(create_params.Dist, create_params.Fssize, create_params.Config)
@@ -72,7 +72,7 @@ func GoCreateContainer(lxc_c lxc.Container, create_params createContainerParams,
 	}
 	callback_req := rpc.CallbackRequest{Err: err, Identifier: lxc_c.Name, Op_type: "CREATE_CONTAINER", Metadata: meta, Code: create_params.Code, Output: out}
 	log.Printf("Making callback request to %s: %v", create_params.Callback, callback_req)
-	rpc.DoCallbackRequest(create_params.Callback, callback_req, env.ClientUser, env.ClientPassword)
+	rpc.DoCallbackRequest(create_params.Callback, callback_req, ClientAuth)
 }
 
 func PostListContainerHandler(env *rpc.Env, w http.ResponseWriter, r *http.Request) (rpc.Response, int, error) {
@@ -98,7 +98,7 @@ func PostListContainerHandler(env *rpc.Env, w http.ResponseWriter, r *http.Reque
 		return nil, http.StatusBadRequest, rpc.StatusError{Err: errors.New("Container already exists")}
 	}
 
-	go GoCreateContainer(*container, create_params, env)
+	go GoCreateContainer(*container, create_params, env.ClientAuth)
 
 	return rpc.AsyncResponse{"OK", http.StatusOK, map[string]interface{}{}}, http.StatusOK, nil
 
