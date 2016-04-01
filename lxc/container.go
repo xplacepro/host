@@ -153,7 +153,7 @@ func (c *Container) RamUsage() (int, error) {
 
 func (c *Container) Create(template string, fssize int, config string) (string, error) {
 	out, err := common.RunCommand(path.Join(LXC_BIN, "lxc-create"), []string{"-n", c.Name,
-		"-t", template, "-B", "lvm", fmt.Sprintf("--fssize=%vGB", fssize)})
+		"-t", template, "-B", "lvm", fmt.Sprintf("--fssize=%vb", fssize)})
 	if err := c.AppendConfig(config); err != nil {
 		return out, err
 	}

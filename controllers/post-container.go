@@ -2,8 +2,6 @@ package controllers
 
 import (
 	"encoding/json"
-	"errors"
-	"fmt"
 	"github.com/gorilla/mux"
 	"github.com/xplacepro/host/lxc"
 	"github.com/xplacepro/rpc"
@@ -15,7 +13,7 @@ type updateContainer struct {
 	Config string
 }
 
-func PostContainerHandler(env *rpc.Env, w http.ResponseWriter, r *http.Request) (rpc.Response, int, error) {
+func PostContainerHandler(env *rpc.Env, w http.ResponseWriter, r *http.Request) rpc.Response {
 	vars := mux.Vars(r)
 	hostname := vars["hostname"]
 
@@ -23,24 +21,24 @@ func PostContainerHandler(env *rpc.Env, w http.ResponseWriter, r *http.Request) 
 
 	data, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		return nil, http.StatusBadRequest, rpc.StatusError{Err: err}
+		rpc.BadRequest(err)
 	}
 
 	err = json.Unmarshal(data, &c)
 	if err != nil {
-		return nil, http.StatusBadRequest, rpc.StatusError{Err: err}
+		rpc.BadRequest(err)
 	}
 
 	container := lxc.NewContainer(hostname)
 
 	if !container.Exists() {
-		return nil, http.StatusBadRequest, rpc.StatusError{Err: errors.New(fmt.Sprintf("%s doesn't exist", hostname))}
+		return rpc.NotFound
 	}
 
 	if err := container.ReplaceConfig(c.Config); err != nil {
-		return nil, http.StatusBadRequest, rpc.StatusError{Err: err}
+		return rpc.InternalError(err)
 	}
 
-	return rpc.SyncResponse{"Success", http.StatusOK, map[string]interface{}{}}, http.StatusOK, nil
+	return rpc.SyncResponse(nil)
 
 }

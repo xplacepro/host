@@ -6,14 +6,14 @@ import (
 	"net/http"
 )
 
-func GetListContainerHandler(env *rpc.Env, w http.ResponseWriter, r *http.Request) (rpc.Response, int, error) {
+func GetListContainerHandler(env *rpc.Env, w http.ResponseWriter, r *http.Request) rpc.Response {
 	containers, err := lxc.ListContainers()
 	response := make(map[string]interface{})
 
 	if err != nil {
-		return nil, http.StatusInternalServerError, rpc.StatusError{Err: err}
+		return rpc.InternalError(err)
 	}
 
 	response["Сontainers"] = containers
-	return rpc.SyncResponse{"Success", http.StatusOK, response}, http.StatusOK, nil
+	return rpc.SyncResponse(response)
 }
