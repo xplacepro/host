@@ -219,7 +219,7 @@ func (c *Container) ReadConfig() (string, error) {
 
 func (c *Container) AppendConfig(config string) error {
 	path := c.ConfigPath()
-	file, err := os.OpenFile(path, os.O_APPEND|os.O_WRONLY, 644)
+	file, err := os.OpenFile(path, os.O_APPEND|os.O_WRONLY, 0644)
 	defer file.Close()
 
 	if err != nil {
@@ -235,7 +235,7 @@ func (c *Container) AppendConfig(config string) error {
 
 func (c *Container) ReplaceConfig(config string) error {
 	path := c.ConfigPath()
-	return ioutil.WriteFile(path, []byte(config), 644)
+	return ioutil.WriteFile(path, []byte(config), 0644)
 }
 
 func NewContainer(name string) *Container {

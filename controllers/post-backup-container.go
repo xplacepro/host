@@ -1,14 +1,20 @@
 package controllers
 
 import (
+	"encoding/json"
 	"github.com/gorilla/mux"
 	"github.com/xplacepro/common"
 	"github.com/xplacepro/host/lvm2"
 	"github.com/xplacepro/host/lxc"
 	"github.com/xplacepro/rpc"
+	"io/ioutil"
 	"log"
 	"net/http"
 )
+
+type backupContainer struct {
+	Sync bool
+}
 
 func GoBackupContainer(lxc_c lxc.Container, config map[string]string) (interface{}, error) {
 	log.Printf("Backing up container: %v", lxc_c)
@@ -30,7 +36,6 @@ func GoBackupContainer(lxc_c lxc.Container, config map[string]string) (interface
 	}
 
 	backupLv := backupVg.GetLv(BackupName(lxc_c.Name))
-
 	if err := backupLv.Exists(); err != nil {
 		size, _ := lv.Size()
 		if _, err := backupVg.CreateLogicalVolume(BackupName(lxc_c.Name), size); err != nil {
@@ -53,6 +58,18 @@ func PostBackupContainerHandler(env *rpc.Env, w http.ResponseWriter, r *http.Req
 	vars := mux.Vars(r)
 	hostname := vars["hostname"]
 
+	var params backupContainer
+
+	data, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		rpc.BadRequest(err)
+	}
+
+	err = json.Unmarshal(data, &params)
+	if err != nil {
+		rpc.BadRequest(err)
+	}
+
 	container := lxc.NewContainer(hostname)
 
 	if !container.Exists() {
@@ -63,12 +80,17 @@ func PostBackupContainerHandler(env *rpc.Env, w http.ResponseWriter, r *http.Req
 		return rpc.BadRequest(NotStopped(hostname))
 	}
 
-	dlct := func(op *rpc.Operation) (interface{}, error) {
-		return GoBackupContainer(*container, env.Config)
+	if params.Sync {
+		GoBackupContainer(*container, env.Config)
+		return rpc.SyncResponse(nil)
+	} else {
+		dlct := func(op *rpc.Operation) (interface{}, error) {
+			return GoBackupContainer(*container, env.Config)
+		}
+
+		op_id, _ := rpc.OperationCreate(dlct, BACKUP_OP_TYPE)
+
+		return rpc.AsyncResponse(nil, op_id)
 	}
-
-	op_id, _ := rpc.OperationCreate(dlct, BACKUP_OP_TYPE)
-
-	return rpc.AsyncResponse(nil, op_id)
 
 }
