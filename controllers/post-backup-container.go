@@ -32,11 +32,9 @@ func GoBackupContainer(lxc_c lxc.Container, config map[string]string) (interface
 	backupLv := backupVg.GetLv(BackupName(lxc_c.Name))
 
 	if err := backupLv.Exists(); err != nil {
-		if err != nil {
-			size, _ := lv.Size()
-			if _, err := backupVg.CreateLogicalVolume(BackupName(lxc_c.Name), size); err != nil {
-				return nil, err
-			}
+		size, _ := lv.Size()
+		if _, err := backupVg.CreateLogicalVolume(BackupName(lxc_c.Name), size); err != nil {
+			return nil, err
 		}
 	}
 	meta := make(map[string]interface{})
