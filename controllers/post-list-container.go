@@ -43,11 +43,12 @@ func ValidatePostListContainer(c createContainerParams) bool {
 	return true
 }
 
-func CreateContainer(lxc_c lxc.Container, create_params createContainerParams) (interface{}, error) {
+func CreateContainer(lxc_c lxc.Container, create_params createContainerParams, config map[string]string) (interface{}, error) {
 	log.Printf("Creating container: %v, params: %v", lxc_c, create_params)
 	meta := map[string]interface{}{}
 
-	out, err := lxc_c.Create(create_params.Dist, create_params.Fssize, create_params.Config)
+	vgname, _ := config["lvm.lxc_vg"]
+	out, err := lxc_c.Create(create_params.Dist, create_params.Fssize, vgname, create_params.Config)
 	if err != nil {
 		log.Printf("Error creating container, %s", err.Error())
 		return "", err
@@ -88,7 +89,7 @@ func PostListContainerHandler(env *rpc.Env, w http.ResponseWriter, r *http.Reque
 	}
 
 	crct := func(op *rpc.Operation) (interface{}, error) {
-		return CreateContainer(*container, create_params)
+		return CreateContainer(*container, create_params, env.Config)
 	}
 
 	op_id, _ := rpc.OperationCreate(crct, "CREATE_OP_TYPE")
