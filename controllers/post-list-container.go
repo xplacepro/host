@@ -59,7 +59,7 @@ func CreateContainer(lxc_c lxc.Container, create_params createContainerParams, c
 
 	conf, _ := lxc_c.ReadConfig()
 	meta["config"] = conf
-	ip_address, ip_err := lxc_c.GetInternalIp(30)
+	ip_address, ip_err := lxc_c.GetInternalIp(30, true)
 	if ip_err == nil {
 		meta["internal_ipv4"] = ip_address
 	}

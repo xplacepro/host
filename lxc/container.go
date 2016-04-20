@@ -75,7 +75,7 @@ func (c *Container) Resources() map[string]interface{} {
 	return resources
 }
 
-func (c *Container) GetInternalIp(timeout int) (string, error) {
+func (c *Container) GetInternalIp(timeout int, stop bool) (string, error) {
 	if err := c.Start(); err != nil {
 		return "", err
 	}
@@ -102,13 +102,17 @@ func (c *Container) GetInternalIp(timeout int) (string, error) {
 
 	select {
 	case res := <-ip_chan:
-		if err := c.Stop(); err != nil {
-			return res, err
+		if stop {
+			if err := c.Stop(); err != nil {
+				return res, err
+			}
 		}
 		return res, nil
 	case <-time.After(time.Second * time.Duration(timeout)):
-		if err := c.Stop(); err != nil {
-			return "", err
+		if stop {
+			if err := c.Stop(); err != nil {
+				return "", err
+			}
 		}
 		log.Printf("Timeout while getting ip address for container %s", c.Name)
 		return "", nil

@@ -110,26 +110,38 @@ func CloneContainer(originalContainer *lxc.Container, newContainer *lxc.Containe
 
 	time.Sleep(1)
 
-	defer common.RunCommand("umount", []string{originalPath})
-	defer common.RunCommand("umount", []string{clonePath})
+	cleanUp := func() {
+		common.RunCommand("umount", []string{originalPath})
+		common.RunCommand("umount", []string{clonePath})
+	}
 
 	if _, err := common.Rsync(fmt.Sprintf("%s/", originalPath), clonePath); err != nil {
+		cleanUp()
 		return nil, err
 	}
 
 	if err := common.ReplaceInFile(path.Join(clonePath, "/etc/hostname"), clone_params.Original, clone_params.Hostname, 0644); err != nil {
+		cleanUp()
 		return nil, err
 	}
 
 	if err := common.ReplaceInFile(path.Join(clonePath, "/etc/hosts"), clone_params.Original, clone_params.Hostname, 0644); err != nil {
+		cleanUp()
 		return nil, err
 	}
 
 	log.Printf("Cloned container: %v", clone_params)
 
+	cleanUp()
+
+	defer originalContainer.Stop()
+	if ip_address, ip_err := originalContainer.GetInternalIp(30, false); err != nil {
+		return nil, ip_err
+	}
+
 	time.Sleep(2)
 
-	ip_address, ip_err := newContainer.GetInternalIp(30)
+	ip_address, ip_err := newContainer.GetInternalIp(30, true)
 	if ip_err == nil {
 		meta["internal_ipv4"] = ip_address
 	}
