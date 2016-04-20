@@ -12,6 +12,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"path"
 	"regexp"
 	"strings"
 	"time"
@@ -36,7 +37,7 @@ func CloneContainer(originalContainer *lxc.Container, newContainer *lxc.Containe
 	log.Printf("Cloning container: %v, params: %v", clone_params.Original, clone_params)
 	meta := map[string]interface{}{}
 
-	if err := os.MkdirAll(newContainer.BasePath(), 770); err != nil {
+	if err := os.MkdirAll(newContainer.BasePath(), 0770); err != nil {
 		return nil, err
 	}
 
@@ -113,6 +114,14 @@ func CloneContainer(originalContainer *lxc.Container, newContainer *lxc.Containe
 	defer common.RunCommand("umount", []string{clonePath})
 
 	if _, err := common.Rsync(fmt.Sprintf("%s/", originalPath), clonePath); err != nil {
+		return nil, err
+	}
+
+	if err := common.ReplaceInFile(path.Join(clonePath, "/etc/hostname"), clone_params.Original, clone_params.Hostname, 0644); err != nil {
+		return nil, err
+	}
+
+	if err := common.ReplaceInFile(path.Join(clonePath, "/etc/hosts"), clone_params.Original, clone_params.Hostname, 0644); err != nil {
 		return nil, err
 	}
 
