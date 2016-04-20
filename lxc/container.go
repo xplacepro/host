@@ -2,6 +2,8 @@ package lxc
 
 import (
 	"bytes"
+	"crypto/rand"
+	"encoding/hex"
 	"fmt"
 	"github.com/xplacepro/common"
 	"io"
@@ -205,8 +207,12 @@ func (c Container) String() string {
 	return fmt.Sprintf("name: %s", c.Name)
 }
 
+func (c *Container) BasePath() string {
+	return path.Join(LXC_BASE_PATH, c.Name)
+}
+
 func (c *Container) ConfigPath() string {
-	return path.Join(LXC_BASE_PATH, c.Name, "config")
+	return path.Join(c.BasePath(), "config")
 }
 
 func (c *Container) ReadConfig() (string, error) {
@@ -257,4 +263,14 @@ func ListContainers() ([]map[string]interface{}, error) {
 		}
 	}
 	return res, err
+}
+
+func GenerateNewMacAddr() (string, error) {
+	bytes := make([]byte, 3)
+	if _, err := rand.Read(bytes); err != nil {
+		return "", err
+	}
+	hex_str := hex.EncodeToString(bytes)
+	var res []string = []string{hex_str[0:2], hex_str[2:4], hex_str[4:6]}
+	return strings.Join(res, ":"), nil
 }

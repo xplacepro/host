@@ -59,6 +59,7 @@ func main() {
 
 	r.Handle("/api/containers/1.0/", rpc.Handler{env, controllers.GetListContainerHandler}).Methods("GET")
 	r.Handle("/api/containers/1.0/", rpc.Handler{env, controllers.PostListContainerHandler}).Methods("POST")
+	r.Handle("/api/containers/1.0/clone/", rpc.Handler{env, controllers.PostCloneContainerHandler}).Methods("POST")
 	r.Handle("/api/containers/1.0/{hostname:[a-zA-Z0-9-_]+}/", rpc.Handler{env, controllers.GetContainerHandler}).Methods("GET")
 	r.Handle("/api/containers/1.0/{hostname:[a-zA-Z0-9-_]+}/", rpc.Handler{env, controllers.PostContainerHandler}).Methods("POST")
 	r.Handle("/api/containers/1.0/{hostname:[a-zA-Z0-9-_]+}/", rpc.Handler{env, controllers.DeleteContainerHandler}).Methods("DELETE")
