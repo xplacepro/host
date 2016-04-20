@@ -58,6 +58,8 @@ func CloneContainer(originalContainer *lxc.Container, newContainer *lxc.Containe
 		return nil, err
 	}
 
+	meta["config"] = conf
+
 	vgname := config["lvm.lxc_vg"]
 
 	vg := lvm2.VolumeGroup{Name: vgname}
@@ -110,7 +112,7 @@ func CloneContainer(originalContainer *lxc.Container, newContainer *lxc.Containe
 	defer common.RunCommand("umount", []string{originalPath})
 	defer common.RunCommand("umount", []string{clonePath})
 
-	if _, err := common.Rsync(originalPath, clonePath); err != nil {
+	if _, err := common.Rsync(fmt.Sprintf("%s/", originalPath), clonePath); err != nil {
 		return nil, err
 	}
 
