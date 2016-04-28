@@ -93,7 +93,7 @@ func PostListContainerHandler(env *rpc.Env, w http.ResponseWriter, r *http.Reque
 		return CreateContainer(*container, create_params, env.Config)
 	}
 
-	op_id, _ := rpc.OperationCreate(crct, CREATE_OP_TYPE)
+	op_id := rpc.OperationCreate(crct, CREATE_OP_TYPE)
 
 	return rpc.AsyncResponse(nil, op_id)
 

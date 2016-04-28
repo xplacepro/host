@@ -88,7 +88,7 @@ func PostBackupContainerHandler(env *rpc.Env, w http.ResponseWriter, r *http.Req
 			return GoBackupContainer(*container, env.Config)
 		}
 
-		op_id, _ := rpc.OperationCreate(dlct, BACKUP_OP_TYPE)
+		op_id := rpc.OperationCreate(dlct, BACKUP_OP_TYPE)
 
 		return rpc.AsyncResponse(nil, op_id)
 	}

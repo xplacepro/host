@@ -55,7 +55,7 @@ func DeleteContainerHandler(env *rpc.Env, w http.ResponseWriter, r *http.Request
 		return DeleteContainer(*container, env.Config)
 	}
 
-	op_id, _ := rpc.OperationCreate(dlct, "DELETE_OP_TYPE")
+	op_id := rpc.OperationCreate(dlct, "DELETE_OP_TYPE")
 
 	return rpc.AsyncResponse(nil, op_id)
 }

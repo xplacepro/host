@@ -63,7 +63,7 @@ func PostRestoreContainerHandler(env *rpc.Env, w http.ResponseWriter, r *http.Re
 		return RestoreContainer(*container, env.Config)
 	}
 
-	op_id, _ := rpc.OperationCreate(dlct, RESTORE_OP_TYPE)
+	op_id := rpc.OperationCreate(dlct, RESTORE_OP_TYPE)
 
 	return rpc.AsyncResponse(nil, op_id)
 }

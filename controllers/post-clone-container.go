@@ -135,7 +135,7 @@ func CloneContainer(originalContainer *lxc.Container, newContainer *lxc.Containe
 	cleanUp()
 
 	defer originalContainer.Stop()
-	if ip_address, ip_err := originalContainer.GetInternalIp(30, false); err != nil {
+	if _, ip_err := originalContainer.GetInternalIp(30, false); ip_err != nil {
 		return nil, ip_err
 	}
 
@@ -184,7 +184,7 @@ func PostCloneContainerHandler(env *rpc.Env, w http.ResponseWriter, r *http.Requ
 		return CloneContainer(originalContainer, container, clone_params, env.Config)
 	}
 
-	op_id, _ := rpc.OperationCreate(crct, CLONE_OP_TYPE)
+	op_id := rpc.OperationCreate(crct, CLONE_OP_TYPE)
 
 	return rpc.AsyncResponse(nil, op_id)
 
