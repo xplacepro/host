@@ -44,17 +44,14 @@ func ValidatePostListContainer(c createContainerParams) bool {
 }
 
 func CreateContainer(lxc_c lxc.Container, create_params createContainerParams, config map[string]string) (interface{}, error) {
-	log.Printf("Creating container: %v, params: %v", lxc_c, create_params)
 	meta := map[string]interface{}{}
 
 	vgname, _ := config["lvm.lxc_vg"]
 	out, err := lxc_c.Create(create_params.Dist, create_params.Fssize, vgname, create_params.Config, create_params.User, create_params.Password)
 	if err != nil {
-		log.Printf("Error creating container, %s", err.Error())
 		return "", err
 	}
 	meta["output"] = out
-	log.Printf("Created container: %v, params: %v, result: %v, err: %v", lxc_c, create_params, out, err)
 	time.Sleep(2)
 
 	conf, _ := lxc_c.ReadConfig()

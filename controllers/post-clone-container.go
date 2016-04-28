@@ -34,7 +34,6 @@ func ValidatePostCloneContainer(c cloneContainerParams) bool {
 }
 
 func CloneContainer(originalContainer *lxc.Container, newContainer *lxc.Container, clone_params cloneContainerParams, config map[string]string) (interface{}, error) {
-	log.Printf("Cloning container: %v, params: %v", clone_params.Original, clone_params)
 	meta := map[string]interface{}{}
 
 	if err := os.MkdirAll(newContainer.BasePath(), 0770); err != nil {
@@ -129,8 +128,6 @@ func CloneContainer(originalContainer *lxc.Container, newContainer *lxc.Containe
 		cleanUp()
 		return nil, err
 	}
-
-	log.Printf("Cloned container: %v", clone_params)
 
 	cleanUp()
 

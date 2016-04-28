@@ -10,7 +10,6 @@ import (
 )
 
 func DeleteContainer(lxc_c lxc.Container, config map[string]string) (interface{}, error) {
-	log.Printf("Deleting container: %v", lxc_c)
 	meta := map[string]interface{}{}
 	out, err := lxc_c.Destroy()
 	meta["output"] = out
@@ -33,7 +32,6 @@ func DeleteContainer(lxc_c lxc.Container, config map[string]string) (interface{}
 		meta["lvremove"] = r_out
 	}
 
-	log.Printf("Deleted container: %v, result: %v, err: %v", lxc_c, out, err)
 	return meta, nil
 }
 
