@@ -6,7 +6,6 @@ import (
 	"github.com/xplacepro/host/lvm2"
 	"github.com/xplacepro/host/lxc"
 	"github.com/xplacepro/rpc"
-	"log"
 	"net/http"
 )
 

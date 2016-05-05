@@ -5,7 +5,6 @@ import (
 	"github.com/xplacepro/host/lxc"
 	"github.com/xplacepro/rpc"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"strings"
 	"time"
