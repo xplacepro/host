@@ -5,12 +5,10 @@ import (
 	"github.com/xplacepro/host/lvm2"
 	"github.com/xplacepro/host/lxc"
 	"github.com/xplacepro/rpc"
-	"log"
 	"net/http"
 )
 
 func DeleteContainer(lxc_c lxc.Container, config map[string]string) (interface{}, error) {
-	log.Printf("Deleting container: %v", lxc_c)
 	meta := map[string]interface{}{}
 	out, err := lxc_c.Destroy()
 	meta["output"] = out
@@ -33,7 +31,6 @@ func DeleteContainer(lxc_c lxc.Container, config map[string]string) (interface{}
 		meta["lvremove"] = r_out
 	}
 
-	log.Printf("Deleted container: %v, result: %v, err: %v", lxc_c, out, err)
 	return meta, nil
 }
 
@@ -55,7 +52,7 @@ func DeleteContainerHandler(env *rpc.Env, w http.ResponseWriter, r *http.Request
 		return DeleteContainer(*container, env.Config)
 	}
 
-	op_id, _ := rpc.OperationCreate(dlct, "DELETE_OP_TYPE")
+	op_id := rpc.OperationCreate(dlct, "DELETE_OP_TYPE")
 
 	return rpc.AsyncResponse(nil, op_id)
 }

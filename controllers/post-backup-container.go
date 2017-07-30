@@ -8,7 +8,6 @@ import (
 	"github.com/xplacepro/host/lxc"
 	"github.com/xplacepro/rpc"
 	"io/ioutil"
-	"log"
 	"net/http"
 )
 
@@ -17,7 +16,6 @@ type backupContainer struct {
 }
 
 func GoBackupContainer(lxc_c lxc.Container, config map[string]string) (interface{}, error) {
-	log.Printf("Backing up container: %v", lxc_c)
 	lxcVg := lvm2.VolumeGroup{Name: config["lvm.lxc_vg"]}
 
 	if err := lxcVg.Exists(); err != nil {
@@ -48,8 +46,6 @@ func GoBackupContainer(lxc_c lxc.Container, config map[string]string) (interface
 		return nil, err
 	}
 	meta["output"] = out
-
-	log.Printf("Backed up container: %v, result: %v, err: %v", lxc_c, out, err)
 
 	return meta, nil
 }
@@ -88,7 +84,7 @@ func PostBackupContainerHandler(env *rpc.Env, w http.ResponseWriter, r *http.Req
 			return GoBackupContainer(*container, env.Config)
 		}
 
-		op_id, _ := rpc.OperationCreate(dlct, BACKUP_OP_TYPE)
+		op_id := rpc.OperationCreate(dlct, BACKUP_OP_TYPE)
 
 		return rpc.AsyncResponse(nil, op_id)
 	}

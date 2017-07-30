@@ -6,12 +6,10 @@ import (
 	"github.com/xplacepro/host/lvm2"
 	"github.com/xplacepro/host/lxc"
 	"github.com/xplacepro/rpc"
-	"log"
 	"net/http"
 )
 
 func RestoreContainer(lxc_c lxc.Container, config map[string]string) (interface{}, error) {
-	log.Printf("Restoring container: %v", lxc_c)
 	lxcVg := lvm2.VolumeGroup{Name: config["lvm.lxc_vg"]}
 
 	if err := lxcVg.Exists(); err != nil {
@@ -40,7 +38,6 @@ func RestoreContainer(lxc_c lxc.Container, config map[string]string) (interface{
 		return nil, err
 	}
 	meta["output"] = out
-	log.Printf("Restored container: %v, result: %v, err: %v", lxc_c, out, err)
 
 	return meta, nil
 }
@@ -63,7 +60,7 @@ func PostRestoreContainerHandler(env *rpc.Env, w http.ResponseWriter, r *http.Re
 		return RestoreContainer(*container, env.Config)
 	}
 
-	op_id, _ := rpc.OperationCreate(dlct, RESTORE_OP_TYPE)
+	op_id := rpc.OperationCreate(dlct, RESTORE_OP_TYPE)
 
 	return rpc.AsyncResponse(nil, op_id)
 }

@@ -5,7 +5,6 @@ import (
 	"github.com/xplacepro/host/lxc"
 	"github.com/xplacepro/rpc"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"strings"
 	"time"
@@ -18,6 +17,7 @@ type createContainerParams struct {
 	User     string
 	Password string
 	Config   string
+	Clone    string
 }
 
 func ValidatePostListContainer(c createContainerParams) bool {
@@ -39,26 +39,23 @@ func ValidatePostListContainer(c createContainerParams) bool {
 	if len(c.Config) == 0 {
 		return false
 	}
-
 	return true
 }
 
 func CreateContainer(lxc_c lxc.Container, create_params createContainerParams, config map[string]string) (interface{}, error) {
-	log.Printf("Creating container: %v, params: %v", lxc_c, create_params)
 	meta := map[string]interface{}{}
 
 	vgname, _ := config["lvm.lxc_vg"]
 	out, err := lxc_c.Create(create_params.Dist, create_params.Fssize, "ext4", vgname, create_params.Config, create_params.User, create_params.Password)
 	if err != nil {
-		log.Printf("Error creating container, %s", err.Error())
 		return "", err
 	}
 	meta["output"] = out
-	log.Printf("Created container: %v, params: %v, result: %v, err: %v", lxc_c, create_params, out, err)
 	time.Sleep(2)
+
 	conf, _ := lxc_c.ReadConfig()
 	meta["config"] = conf
-	ip_address, ip_err := lxc_c.GetInternalIp(30)
+	ip_address, ip_err := lxc_c.GetInternalIp(30, true)
 	if ip_err == nil {
 		meta["internal_ipv4"] = ip_address
 	}
@@ -92,7 +89,7 @@ func PostListContainerHandler(env *rpc.Env, w http.ResponseWriter, r *http.Reque
 		return CreateContainer(*container, create_params, env.Config)
 	}
 
-	op_id, _ := rpc.OperationCreate(crct, "CREATE_OP_TYPE")
+	op_id := rpc.OperationCreate(crct, CREATE_OP_TYPE)
 
 	return rpc.AsyncResponse(nil, op_id)
 

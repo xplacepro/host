@@ -2,6 +2,8 @@ package lxc
 
 import (
 	"bytes"
+	"crypto/rand"
+	"encoding/hex"
 	"fmt"
 	"github.com/xplacepro/common"
 	"io"
@@ -73,7 +75,7 @@ func (c *Container) Resources() map[string]interface{} {
 	return resources
 }
 
-func (c *Container) GetInternalIp(timeout int) (string, error) {
+func (c *Container) GetInternalIp(timeout int, stop bool) (string, error) {
 	if err := c.Start(); err != nil {
 		return "", err
 	}
@@ -100,13 +102,17 @@ func (c *Container) GetInternalIp(timeout int) (string, error) {
 
 	select {
 	case res := <-ip_chan:
-		if err := c.Stop(); err != nil {
-			return res, err
+		if stop {
+			if err := c.Stop(); err != nil {
+				return res, err
+			}
 		}
 		return res, nil
 	case <-time.After(time.Second * time.Duration(timeout)):
-		if err := c.Stop(); err != nil {
-			return "", err
+		if stop {
+			if err := c.Stop(); err != nil {
+				return "", err
+			}
 		}
 		log.Printf("Timeout while getting ip address for container %s", c.Name)
 		return "", nil
@@ -205,8 +211,12 @@ func (c Container) String() string {
 	return fmt.Sprintf("name: %s", c.Name)
 }
 
+func (c *Container) BasePath() string {
+	return path.Join(LXC_BASE_PATH, c.Name)
+}
+
 func (c *Container) ConfigPath() string {
-	return path.Join(LXC_BASE_PATH, c.Name, "config")
+	return path.Join(c.BasePath(), "config")
 }
 
 func (c *Container) ReadConfig() (string, error) {
@@ -257,4 +267,14 @@ func ListContainers() ([]map[string]interface{}, error) {
 		}
 	}
 	return res, err
+}
+
+func GenerateNewMacAddr() (string, error) {
+	bytes := make([]byte, 3)
+	if _, err := rand.Read(bytes); err != nil {
+		return "", err
+	}
+	hex_str := hex.EncodeToString(bytes)
+	var res []string = []string{hex_str[0:2], hex_str[2:4], hex_str[4:6]}
+	return strings.Join(res, ":"), nil
 }

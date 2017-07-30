@@ -11,3 +11,4 @@ func NotStopped(hostname string) error {
 
 var ValidationError = errors.New("validation error")
 var AlreadyExistsError = errors.New("already exists")
+var DoesNotExistError = errors.New("is not defined")
