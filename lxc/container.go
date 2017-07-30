@@ -151,10 +151,10 @@ func (c *Container) RamUsage() (int, error) {
 	return strconv.Atoi(strings.Trim(out, "\n"))
 }
 
-func (c *Container) Create(template string, fssize int, vgname string, config string, user string, password string) (string, error) {
+func (c *Container) Create(template string, fssize int, fstype string, vgname string, config string, user string, password string) (string, error) {
 	out, err := common.RunCommand(path.Join(LXC_BIN, "lxc-create"), []string{"-n", c.Name,
-		"-B", "lvm", fmt.Sprintf("--fssize=%vb", fssize), fmt.Sprintf("--vgname=%s", vgname),
-		"-t", template, "--", fmt.Sprintf("--user=%s", user), fmt.Sprintf("--password=%s", password)})
+		"-B", "lvm", fmt.Sprintf("--fssize=%vb", fssize), fmt.Sprintf("--fstype=%s", fstype),
+		fmt.Sprintf("--vgname=%s", vgname), "-t", template, "--", fmt.Sprintf("--user=%s", user), fmt.Sprintf("--password=%s", password)})
 	if err := c.AppendConfig(config); err != nil {
 		return out, err
 	}

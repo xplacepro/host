@@ -48,7 +48,7 @@ func CreateContainer(lxc_c lxc.Container, create_params createContainerParams, c
 	meta := map[string]interface{}{}
 
 	vgname, _ := config["lvm.lxc_vg"]
-	out, err := lxc_c.Create(create_params.Dist, create_params.Fssize, vgname, create_params.Config, create_params.User, create_params.Password)
+	out, err := lxc_c.Create(create_params.Dist, create_params.Fssize, "ext4", vgname, create_params.Config, create_params.User, create_params.Password)
 	if err != nil {
 		log.Printf("Error creating container, %s", err.Error())
 		return "", err
